@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from database import leave_collection
 from models.leave_model import LeaveRequest
+from bson import ObjectId
 
 router = APIRouter(prefix="/leave", tags=["Leave"])
 
@@ -20,6 +21,7 @@ async def get_all_leave():
 
     async for leave in leave_collection.find():
         leave["id"] = str(leave["_id"])
+        del leave["_id"] 
         leaves.append(leave)
 
     return leaves
@@ -29,8 +31,17 @@ async def get_all_leave():
 async def approve_leave(id: str):
 
     await leave_collection.update_one(
-        {"_id": id},
+        {"_id": ObjectId(id)},
         {"$set": {"status": "approved"}}
     )
 
     return {"message": "approved"}
+@router.put("/{id}/reject")
+async def reject_leave(id: str):
+
+    await leave_collection.update_one(
+        {"_id": ObjectId(id)},
+        {"$set": {"status": "rejected"}}
+    )
+
+    return {"message": "rejected"}

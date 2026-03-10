@@ -20,6 +20,7 @@ async def get_students():
 
     async for student in students_collection.find():
         student["id"] = str(student["_id"])
+        del student["_id"]
         students.append(student)
 
     return students
